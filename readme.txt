@@ -10,4 +10,5 @@ sudo yum install php-gd
 sudo yum install gd gd-devel
 composer update
 composer install
+composer require guzzlehttp/guzzle
 php s1.php

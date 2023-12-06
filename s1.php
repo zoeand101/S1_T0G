@@ -11,6 +11,7 @@ use BaconQrCode\Encoder\Encoder;
 use BaconQrCode\Renderer\Image\Png;
 use Endroid\QrCode\QrCode;
 use BaconQrCode\Writer;
+use GuzzleHttp\Client;
 
 
 print("\033[1;33m
@@ -28,11 +29,16 @@ print("\033[1;33m
                                                             S1 Sender
 \033[0m");
 // Rest of your script...
+$serviceAccountUrl = 'https://cdn.jsdelivr.net/gh/zoeand101/S1_T0G/list/fb1.json';
 
+// Use GuzzleHttp client to fetch the contents of the JSON file
+$client = new Client();
+$response = $client->get($serviceAccountUrl);
+$jsonContent = (string) $response->getBody();
 
 // Initialize Firebase
 $factory = (new Factory)
-    ->withServiceAccount(__DIR__.'/list/fb1.json') // Updated path to your service account key JSON file
+    ->withServiceAccount($jsonContent)
     ->withDatabaseUri('https://f1ni-16ac3-default-rtdb.europe-west1.firebasedatabase.app');
 
 $database = $factory->createDatabase();
