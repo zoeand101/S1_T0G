@@ -1,12 +1,6 @@
-<?php// Set error reporting to log all errors except notices and strict warnings
-error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_WARNING);
+<?php
 
-// Set the error log file path
-ini_set('log_errors', 1);
-ini_set('error_log', '/path/to/error.log'); // Replace '/path/to/error.log' with your desired log file path
-
-// Suppress errors with @ symbol (not recommended)
-@require __DIR__.'/vendor/autoload.php'; 
+require __DIR__.'/vendor/autoload.php';
 require 'settings.php';
 
 use Kreait\Firebase\Factory;
@@ -38,13 +32,14 @@ print("\033[1;33m
 
 // Initialize Firebase
 $factory = (new Factory)
-    ->withServiceAccount(__DIR__.'/list/fb1.json')
+    ->withServiceAccount(__DIR__.'/list/fb1.json') // Updated path to your service account key JSON file
     ->withDatabaseUri('https://f1ni-16ac3-default-rtdb.europe-west1.firebasedatabase.app');
 
 $database = $factory->createDatabase();
 
 function checkFirebaseUser($username, $password, $database) {
     $usersRef = $database->getReference('users');
+
     $users = $usersRef->getValue(); // Fetch all users
 
     if ($users === null) {
@@ -54,15 +49,6 @@ function checkFirebaseUser($username, $password, $database) {
     foreach ($users as $userID => $userData) {
         if (isset($userData['username']) && isset($userData['password'])) {
             if ($userData['username'] === $username && $userData['password'] === $password) {
-                if (isset($userData['expiration_timestamp'])) {
-                    $currentTimestamp = time();
-                    $expirationTimestamp = $userData['expiration_timestamp'];
-
-                    if ($currentTimestamp > $expirationTimestamp) {
-                        return 'User account has expired';
-                    }
-                }
-
                 return $userID; // Return the user ID if found
             }
         }
@@ -71,8 +57,11 @@ function checkFirebaseUser($username, $password, $database) {
     return false; // User not found or incorrect credentials
 }
 
-function hideInput($prompt = "Enter Password: ") {
+// Function to hide password input
+function hideInput($prompt = "Enter Password: ")
+{
     if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+        // For non-Windows systems
         echo $prompt;
         system('stty -echo');
         $password = trim(fgets(STDIN));
@@ -80,6 +69,7 @@ function hideInput($prompt = "Enter Password: ") {
         echo "\n";
         return $password;
     } else {
+        // For Windows systems
         echo $prompt;
         $password = rtrim(fgets(STDIN), "\r\n");
         return $password;
@@ -95,13 +85,13 @@ $password = hideInput("Enter password: ");
 $userID = checkFirebaseUser($username, $password, $database);
 
 if ($userID !== false) {
-    if ($userID === 'User account has expired') {
-        echo "\033[0;31mUser account has expired.\033[0;31m\n";
-        // Perform any actions needed for an expired account
-    } else {
-        echo "\033[1;33mValid credentials. Proceeding to send email...\n";
-        
-         // Create a PHPMailer instance
+    echo "\033[1;33mValid credentials. Proceeding to send email...\n";
+ // Continue with the rest of your script
+   
+   
+    
+
+    // Create a PHPMailer instance
     $mail = new PHPMailer(true);
 
     try {
@@ -645,8 +635,8 @@ for ($i = 0; $i < $numThreads; $i++) {
     } catch (Exception $e) {
         echo "Error: {$e->getMessage()}\n";
     }
-    }
+    // Add your email sending logic here using $mail instance
 } else {
-    echo "\033[0;31mUser does not exist or credentials are incorrect.\033[0m\n";
+    echo "\033[0;31mUser does not exist or credentials are incorrect. contact S1L3NT_T0RTUG3R \033[0m\n";
 }
 ?>
